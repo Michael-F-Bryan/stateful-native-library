@@ -46,7 +46,10 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: doc --all --verbose
-      - name: GitHub Pages Deploy
-        uses: maxheld83/ghpages@v0.2.1
-        env:
-          BUILD_DIR: target/doc
+      - name: Redirect top-level GitHub Pages
+        run: "echo '<meta http-equiv=\"refresh\" content=\"0; url=stateful_native_library/index.html\" />' > target/doc/index.html"
+        shell: bash
+      - name: GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v1.2.5
+        with:
+          build_dir: "target/doc"
