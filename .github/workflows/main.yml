@@ -21,13 +21,16 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          command: check --all --verbose
+          command: check
+          args: --all --verbose
       - uses: actions-rs/cargo@v1
         with:
-          command: build --all --verbose
+          command: build
+          args: --all --verbose
       - uses: actions-rs/cargo@v1
         with:
-          command: test --all --verbose
+          command: test
+          args: --all --verbose
 
   api-docs:
     name: Publish API Docs to GitHub Pages
@@ -45,7 +48,8 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          command: doc --all --verbose
+          command: doc
+          args: --all --verbose
       - name: Redirect top-level GitHub Pages
         run: "echo '<meta http-equiv=\"refresh\" content=\"0; url=stateful_native_library/index.html\" />' > target/doc/index.html"
         shell: bash
