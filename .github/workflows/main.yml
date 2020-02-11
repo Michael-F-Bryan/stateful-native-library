@@ -54,6 +54,8 @@ jobs:
         run: "echo '<meta http-equiv=\"refresh\" content=\"0; url=stateful_native_library/index.html\" />' > target/doc/index.html"
         shell: bash
       - name: GitHub Pages
-        uses: crazy-max/ghaction-github-pages@v1.2.5
+        uses: crazy-max/ghaction-github-pages@v1
         with:
-          build_dir: "target/doc"
+          build_dir: target/doc
+        env:
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}

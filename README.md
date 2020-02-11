@@ -1,6 +1,6 @@
 # stateful-native-library
 
-[![Build Status](https://travis-ci.com/Michael-F-Bryan/stateful-native-library.svg?branch=master)](https://travis-ci.com/Michael-F-Bryan/stateful-native-library)
+[![Continuous integration](https://github.com/Michael-F-Bryan/stateful-native-library/workflows/Continuous%20integration/badge.svg?branch=master)](https://github.com/Michael-F-Bryan/stateful-native-library/actions)
 
 ([API Docs])
 
