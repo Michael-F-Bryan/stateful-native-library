@@ -30,10 +30,47 @@ impl Library {
         }
     }
 
+    /// Start setting parameters.
+    ///
+    /// The [`SettingParameters`] type uses lifetimes to make sure you can't
+    /// use any other [`Library`] functionality while it is alive.
+    ///
+    /// ```rust,compile_fail
+    /// # use stateful_native_library::Library;
+    /// let mut library = Library::new().unwrap();
+    ///
+    /// // start setting parameters
+    /// let mut params = library.set_parameters();
+    ///
+    /// // params is still alive, so trying to create a recipe is a compile
+    /// // error
+    /// library.create_recipe();
+    ///
+    /// // params is still alive until here
+    /// drop(params);
+    /// ```
     pub fn set_parameters(&mut self) -> SettingParameters<'_> {
         SettingParameters { _library: self }
     }
 
+    /// Start creating the inputs for [`execute()`].
+    ///
+    /// The [`RecipeBuilder`] uses lifetimes to make sure you can't do anything
+    /// else while creating a [`Recipe`].
+    ///
+    /// ```rust,compile_fail
+    /// # use stateful_native_library::Library;
+    /// let mut library = Library::new().unwrap();
+    ///
+    /// // start creating the recipe
+    /// let mut recipe_builder = library.create_recipe();
+    ///
+    /// // trying to set parameters while recipe_builder is alive is an error
+    /// library.set_parameters();
+    ///
+    /// // recipe_builder is still alive until here
+    /// drop(recipe_builder);
+    /// ```
     pub fn create_recipe(&mut self) -> RecipeBuilder<'_> {
         RecipeBuilder { _library: self }
     }
