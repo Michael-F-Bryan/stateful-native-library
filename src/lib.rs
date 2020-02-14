@@ -1,7 +1,9 @@
 mod bindings;
 
 use std::{
+    convert::TryFrom,
     marker::PhantomData,
+    os::raw::c_int,
     sync::atomic::{AtomicBool, Ordering},
 };
 
@@ -19,16 +21,33 @@ pub struct Library {
 
 static LIBRARY_IN_USE: AtomicBool = AtomicBool::new(false);
 
+/// A macro you can use when you *know* a function has been statically proven to
+/// not fail.
+macro_rules! cant_fail {
+    ($return_code:expr) => {
+        if let Err(e) = $return_code.into_result() {
+            unreachable!(
+                "The type system should ensure this function can't fail: {}",
+                e
+            );
+        }
+    };
+}
+
 impl Library {
-    pub fn new() -> Result<Library, AlreadyInUse> {
+    pub fn new() -> Result<Library, Error> {
         if LIBRARY_IN_USE.compare_and_swap(false, true, Ordering::SeqCst)
             == false
         {
+            unsafe {
+                bindings::stateful_open().into_result()?;
+            }
+
             Ok(Library {
                 _not_send: PhantomData,
             })
         } else {
-            Err(AlreadyInUse)
+            Err(Error::AlreadyInUse)
         }
     }
 
@@ -52,6 +71,7 @@ impl Library {
     /// drop(params);
     /// ```
     pub fn set_parameters(&mut self) -> SettingParameters<'_> {
+        cant_fail!(unsafe { bindings::stateful_start_setting_parameters() });
         SettingParameters { _library: self }
     }
 
@@ -74,19 +94,19 @@ impl Library {
     /// drop(recipe_builder);
     /// ```
     pub fn create_recipe(&mut self) -> RecipeBuilder<'_> {
+        cant_fail!(unsafe { bindings::stateful_start_adding_items() });
         RecipeBuilder { _library: self }
     }
 }
 
 impl Drop for Library {
-    fn drop(&mut self) { LIBRARY_IN_USE.store(false, Ordering::SeqCst); }
+    fn drop(&mut self) {
+        unsafe {
+            let _ = bindings::stateful_close();
+        }
+        LIBRARY_IN_USE.store(false, Ordering::SeqCst);
+    }
 }
-
-/// An error indicating the `Library` can't be accessed again until the existing
-/// session is over.
-#[derive(Debug, Copy, Clone, PartialEq, thiserror::Error)]
-#[error("The library is already in use")]
-pub struct AlreadyInUse;
 
 pub struct SettingParameters<'lib> {
     _library: &'lib mut Library,
@@ -124,6 +144,14 @@ impl<'lib> RecipeBuilder<'lib> {
     }
 }
 
+impl<'lib> Drop for RecipeBuilder<'lib> {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = bindings::stateful_end_adding_items().into_result();
+        }
+    }
+}
+
 pub struct GroupBuilder<'r, 'lib> {
     _recipe_builder: &'r mut RecipeBuilder<'lib>,
 }
@@ -136,20 +164,55 @@ impl<'r, 'lib> GroupBuilder<'r, 'lib> {
     pub fn finish(self) -> &'r mut RecipeBuilder<'lib> { self._recipe_builder }
 }
 
+impl<'r, 'lib> Drop for GroupBuilder<'r, 'lib> {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = bindings::stateful_end_adding_group().into_result();
+        }
+    }
+}
+
 pub struct Recipe<'lib> {
     _library: &'lib mut Library,
 }
 
-pub enum Error {}
+/// The various error cases that may be encountered while using this library.
+#[derive(Debug, Copy, Clone, PartialEq, thiserror::Error)]
+pub enum Error {
+    #[error("The library is already in use")]
+    AlreadyInUse,
+    #[error("The underlying library is in an invalid state")]
+    InvalidState,
+    #[error("An argument was invalid")]
+    InvalidArgument,
+    #[error("Unknown error code: {}", _0)]
+    Other(c_int),
+}
 
 pub struct Output {
     pub items: Vec<i32>,
 }
 
+trait IntoResult {
+    fn into_result(self) -> Result<(), Error>;
+}
+
+impl IntoResult for c_int {
+    fn into_result(self) -> Result<(), Error> {
+        let code = u32::try_from(self).map_err(|_| Error::Other(self))?;
+
+        match code {
+            bindings::RESULT_OK => Ok(()),
+            bindings::RESULT_BAD_STATE => Err(Error::InvalidState),
+            bindings::RESULT_INVALID_ARGUMENT => Err(Error::InvalidArgument),
+            _ => Err(Error::Other(self)),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::os::raw::c_int;
 
     static_assertions::assert_not_impl_any!(Library: Send, Sync);
 
@@ -176,7 +239,10 @@ mod tests {
     fn ffi_bindings_smoke_test() {
         unsafe {
             assert_eq!(bindings::stateful_open(), bindings::RESULT_OK as c_int);
-            assert_eq!(bindings::stateful_close(), bindings::RESULT_OK as c_int);
+            assert_eq!(
+                bindings::stateful_close(),
+                bindings::RESULT_OK as c_int
+            );
         }
     }
 }
