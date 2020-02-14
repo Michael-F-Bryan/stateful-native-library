@@ -258,7 +258,6 @@ int stateful_execute(progress_cb progress, result_cb result)
     {
         pair.second->flatten(results);
 
-        // notify the caller of progress
         double percent = 100.0 * i / inputs->size();
         progress((int)percent);
 
@@ -294,7 +293,7 @@ int stateful_get_output_by_index(int index, int *value)
 
     auto &results = *temp_results;
 
-    if (index >= results.size())
+    if ((std::size_t)index >= results.size())
     {
         return RESULT_INVALID_ARGUMENT;
     }

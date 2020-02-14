@@ -1,3 +1,5 @@
+mod bindings;
+
 use std::{
     marker::PhantomData,
     sync::atomic::{AtomicBool, Ordering},
