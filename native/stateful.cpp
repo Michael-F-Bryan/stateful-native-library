@@ -264,6 +264,7 @@ int stateful_execute(progress_cb progress, result_cb result)
 
         i++;
     }
+    progress(100);
 
     temp_results = &results;
     result(results.size());
@@ -292,6 +293,12 @@ int stateful_get_output_by_index(int index, int *value)
     }
 
     auto &results = *temp_results;
+
+    if (index >= results.size())
+    {
+        return RESULT_INVALID_ARGUMENT;
+    }
+
     *value = results[index];
     return RESULT_OK;
 }

@@ -32,7 +32,9 @@ int main()
     question_mark(stateful_add_item("another thing", 2));
     question_mark(stateful_start_adding_group("group"));
     question_mark(stateful_add_group_item("nested", 5));
+    question_mark(stateful_add_group_item("nested 2", 23));
     question_mark(stateful_end_adding_group());
+    question_mark(stateful_add_item("one last thing", -42));
     question_mark(stateful_end_adding_items());
 
     question_mark(stateful_execute(on_progress, on_finished));
@@ -68,5 +70,15 @@ int on_progress(int percent)
 int on_finished(int num_results)
 {
     std::cout << "Finished with " << num_results << " items" << std::endl;
+
+    int i = 0;
+    int result;
+
+    while (stateful_get_output_by_index(i, &result) == RESULT_OK)
+    {
+        std::cout << i << " = " << result << std::endl;
+        i++;
+    }
+
     return RESULT_OK;
 }
