@@ -201,7 +201,7 @@ int stateful_add_group_item(const char *name, int value)
     }
 
     temp_group->insert(name, value);
-    return RESULT_BAD_STATE;
+    return RESULT_OK;
 }
 
 int stateful_end_adding_group()
@@ -260,7 +260,7 @@ int stateful_execute(progress_cb progress, result_cb result)
 
         // notify the caller of progress
         double percent = 100.0 * i / inputs->size();
-        progress(percent);
+        progress((int)percent);
 
         i++;
     }
