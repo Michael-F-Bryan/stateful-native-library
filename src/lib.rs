@@ -149,6 +149,7 @@ pub struct Output {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::os::raw::c_int;
 
     static_assertions::assert_not_impl_any!(Library: Send, Sync);
 
@@ -169,5 +170,13 @@ mod tests {
 
         // now the old handle is destroyed, we can create another
         let _another = Library::new().unwrap();
+    }
+
+    #[test]
+    fn ffi_bindings_smoke_test() {
+        unsafe {
+            assert_eq!(bindings::stateful_open(), bindings::RESULT_OK as c_int);
+            assert_eq!(bindings::stateful_close(), bindings::RESULT_OK as c_int);
+        }
     }
 }

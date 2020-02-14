@@ -5,13 +5,14 @@ authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
 build = "build.rs"
+links = "stateful"
 
 [dev-dependencies]
-static_assertions = "1.1.0"
+static_assertions = "1.0"
 
 [dependencies]
-thiserror = "1.0.10"
+thiserror = "1.0"
 
 [build-dependencies]
-cc = "1.0.50"
+cc = "1.0"
 

@@ -3,6 +3,11 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 // The various possible return codes.
 enum
 {
@@ -54,5 +59,9 @@ int stateful_execute(progress_cb progress, result_cb result);
 int stateful_get_num_outputs(int *value);
 // Tries to retrieve a particular output.
 int stateful_get_output_by_index(int index, int *value);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // STATEFUL_H
