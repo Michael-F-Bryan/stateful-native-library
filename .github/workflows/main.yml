@@ -10,8 +10,9 @@ jobs:
       matrix:
         rust:
           - nightly
-          - stable
-          - 1.40.0
+          # we use ManuallyTake, which is only stabilised in 1.41.0
+          # - stable
+          # - 1.41.0
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
