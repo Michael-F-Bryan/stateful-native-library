@@ -4,7 +4,7 @@
 
 ([API Docs])
 
-> **TODO:** Write up an interesting description.
+Code accompanying [A Pragmatic Approach To Global State][article].
 
 ## License
 
@@ -32,4 +32,4 @@ do their best to avoid them, and welcome help in analyzing and fixing them.
 
 [API Docs]: https://michael-f-bryan.github.io/stateful-native-library
 [crev]: https://github.com/crev-dev/cargo-crev
-
+[article]: http://adventures.michaelfbryan.com/posts/pragmatic-global-state/
