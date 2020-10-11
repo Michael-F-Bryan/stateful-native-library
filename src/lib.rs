@@ -113,13 +113,17 @@ impl Library {
         if LIBRARY_IN_USE.compare_and_swap(false, true, Ordering::SeqCst)
             == false
         {
-            unsafe {
-                bindings::stateful_open().into_result()?;
+            let result = unsafe {
+                bindings::stateful_open().into_result().map(|_| Self {
+                    _not_send: PhantomData,
+                })
+            };
+
+            if result.is_err() {
+                LIBRARY_IN_USE.store(false, Ordering::SeqCst);
             }
 
-            Ok(Library {
-                _not_send: PhantomData,
-            })
+            result
         } else {
             Err(Error::AlreadyInUse)
         }
