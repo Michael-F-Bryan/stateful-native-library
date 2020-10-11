@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["stateful_native_library"] = [{"text":"impl Drop for Library","synthetic":false,"types":[]},{"text":"impl&lt;'lib&gt; Drop for SettingParameters&lt;'lib&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'lib&gt; Drop for RecipeBuilder&lt;'lib&gt;","synthetic":false,"types":[]},{"text":"impl&lt;'r, 'lib&gt; Drop for GroupBuilder&lt;'r, 'lib&gt;","synthetic":false,"types":[]}];
+implementors["syn"] = [{"text":"impl&lt;'a&gt; Drop for ParseBuffer&lt;'a&gt;","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
